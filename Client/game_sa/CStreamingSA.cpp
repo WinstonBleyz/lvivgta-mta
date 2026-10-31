@@ -431,8 +431,14 @@ void CStreamingSA::RemoveArchive(unsigned char ucArchiveID)
 
 bool CStreamingSA::SetStreamingBufferSize(uint32 numBlocks)
 {
+    // GTA LVIV BETA: never go below the size GTA computed from the loaded IMGs (largest file).
+    // The default restore value assumes stock gta3.img; modded IMGs with bigger files would then
+    // overflow the buffer (crash in CFileLoader::LoadCollisionFile right after connecting).
+    static const uint32 gtaInitialBlocks = ms_streamingHalfOfBufferSizeBlocks * 2;
+    numBlocks = std::max(numBlocks, gtaInitialBlocks);
+
     numBlocks += numBlocks % 2; // Make sure number is even by "rounding" it upwards. [Otherwise it can't be split in half properly]
-    
+
     // Check if the size is the same already
     if (numBlocks == ms_streamingHalfOfBufferSizeBlocks * 2)
         return true;

@@ -95,6 +95,18 @@ CORE_API int InitializeCore()
 
     WriteDebugEvent(SString("ModuleFileName: %s", *GetLaunchPathFilename()));
 
+    // GTA LVIV BETA: the LVIV map needs raised GTA limits (12k+ buildings, model ids 7000+).
+    // Like the previous LVIV client, load fastman92 limit adjuster from the GTA folder if it is there.
+    for (const wchar_t* name : {L"$Fla92.dll", L"StreamMemFix.asi"})
+    {
+        const fs::path module = g_gtaDirectory / name;
+        if (!fs::exists(module))
+            continue;
+        // Dependencies (DllTricks.dll, MinHook) live next to it, not next to the proxied gta_sa.exe
+        HMODULE handle = LoadLibraryExW(module.c_str(), nullptr, LOAD_WITH_ALTERED_SEARCH_PATH);
+        WriteDebugEvent(SString("Lviv: load %s -> %s (%u)", *ToUTF8(module.wstring()), handle ? "ok" : "failed", handle ? 0 : GetLastError()));
+    }
+
     SetMemoryAllocationFailureHandler();
 
     g_pCore = new CCore();
