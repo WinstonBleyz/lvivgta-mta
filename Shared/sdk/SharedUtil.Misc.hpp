@@ -555,6 +555,17 @@ SString SharedUtil::GetMTASABaseDir()
             }
             if (strInstallRoot.empty())
             {
+                // GTA LVIV BETA: portable fallback - the folder of the running GTA LVIV BETA.exe
+                // (our own registry key may not exist yet, e.g. before the first elevated run)
+                SString strExeDir = ExtractPath(GetLaunchPathFilename());
+                if (SharedUtil::IsUsableMtasaInstallRoot(strExeDir) && !SharedUtil::IsTemporaryUpdateLaunchPath(strExeDir))
+                {
+                    strInstallRoot = strExeDir;
+                    strInstallRootSource = "launch path";
+                }
+            }
+            if (strInstallRoot.empty())
+            {
                 if (!strFirstNonEmptyRegistryValue.empty())
                 {
                     AddReportLog(1042, SString("GetMTASABaseDir: ignoring unusable registry path '%s'", strFirstNonEmptyRegistryValue.c_str()), 1);

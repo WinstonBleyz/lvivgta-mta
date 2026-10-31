@@ -10,7 +10,7 @@ if not exist Build\MTASA.sln call win-create-projects.bat < nul
 for /f "usebackq tokens=1* delims=: " %%i in (`utils\vswhere.exe -latest -requires Microsoft.Component.MSBuild`) do (
     if /i "%%i"=="installationPath" set INSTALLDIR=%%j
 )
-"%INSTALLDIR%\MSBuild\Current\Bin\MSBuild.exe" Build\MTASA.sln -property:Configuration=%CONFIG% -property:Platform=Win32 -maxCpuCount:3 -property:CL_MPCount=3 -nologo -verbosity:minimal
+"%INSTALLDIR%\MSBuild\Current\Bin\MSBuild.exe" Build\MTASA.sln -property:Configuration=%CONFIG% -property:Platform=Win32 -maxCpuCount:3 -property:CL_MPCount=3 -nologo -verbosity:minimal -nodeReuse:false
 if errorlevel 1 exit /b 1
 if not exist Bin\MTA\netc.dll call win-install-data.bat < nul
 exit /b 0

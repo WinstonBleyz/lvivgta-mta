@@ -21,6 +21,7 @@ jobs:
       - name: Add developer net module
         run: |
           mkdir -p Bin/server/x64
+          command -v curl || (apt-get update -qq && apt-get install -y -qq curl ca-certificates)
           curl -fsSL -o Bin/server/x64/net.so https://mirror-cdn.multitheftauto.com/bdata/1.6/net_64.so
 
       - name: Package
