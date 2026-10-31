@@ -2184,6 +2184,40 @@ static int __cdecl CTrain_InitTrains_FindClosestTrackNode(SStationPosition posit
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //
+// GTA LVIV BETA: GTA's D3D9 device-restore callback (0x5BA120)
+//
+// At startup GTA saves the previously registered RwD3D9 device-restore callback in 0xBD0114
+// and chains to it on every device restore (alt-tab back). A limit adjuster loaded into the
+// game can leave a callback there whose code is no longer executable -> crash with EIP in
+// heap memory when restoring the window. Only chain to it if it still points at code.
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+#define HOOKPOS_CGame_DeviceRestoreCallback 0x5BA120
+#define VAR_PreviousDeviceRestoreCallback   0xBD0114
+
+static bool IsExecutableCode(const void* pAddress)
+{
+    MEMORY_BASIC_INFORMATION info;
+    if (!pAddress || !VirtualQuery(pAddress, &info, sizeof(info)) || info.State != MEM_COMMIT || (info.Protect & PAGE_GUARD))
+        return false;
+    return (info.Protect & (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)) != 0;
+}
+
+static void __cdecl CGame_DeviceRestoreCallback()
+{
+    using Callback = void(__cdecl*)();
+    Callback previous = *reinterpret_cast<Callback*>(VAR_PreviousDeviceRestoreCallback);
+    if (IsExecutableCode(reinterpret_cast<const void*>(previous)))
+        previous();
+
+    // Rest of the original function
+    if (*reinterpret_cast<BYTE*>(0xC40350))
+        *reinterpret_cast<BYTE*>(0xC40351) = 1;
+    *reinterpret_cast<BYTE*>(0xC7C729) = 1;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
 // Setup hooks for CrashFixHacks
 //
 ////////////////////////////////////////////////////////////////////////
@@ -2192,6 +2226,8 @@ void CMultiplayerSA::InitHooks_CrashFixHacks()
     // GTA LVIV BETA: redirect the station-node lookup in CTrain::InitTrains (rel32 call)
     MemPut<DWORD>(CALLPOS_CTrain_InitTrains_FindClosestTrackNode + 1,
                   reinterpret_cast<DWORD>(&CTrain_InitTrains_FindClosestTrackNode) - (CALLPOS_CTrain_InitTrains_FindClosestTrackNode + 5));
+    // GTA LVIV BETA: safe device-restore chaining (alt-tab crash)
+    HookInstall(HOOKPOS_CGame_DeviceRestoreCallback, reinterpret_cast<DWORD>(&CGame_DeviceRestoreCallback), 5);
 
     EZHookInstall(CrashFix_Misc1);
     EZHookInstall(CrashFix_Misc2);
