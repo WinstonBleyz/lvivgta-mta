@@ -45,6 +45,10 @@ inline bool CBuildingsPoolSA::AddBuildingToPool(CClientBuilding* pClientBuilding
     if (iElementIndexInPool == -1)
         return false;
 
+    // GTA LVIV BETA: GTA's pool may be bigger than MAX_BUILDINGS (limit adjuster) - grow our table with it
+    if (static_cast<size_t>(iElementIndexInPool) >= m_buildingPool.entities.size())
+        m_buildingPool.entities.resize(static_cast<size_t>((*m_ppBuildingPoolInterface)->Size()), {nullptr, nullptr});
+
     m_buildingPool.entities[static_cast<size_t>(iElementIndexInPool)] = {pBuilding, (CClientEntity*)pClientBuilding};
 
     // Increase the count of objects
@@ -57,7 +61,8 @@ CClientEntity* CBuildingsPoolSA::GetClientBuilding(CBuildingSAInterface* pGameIn
 {
     std::int32_t poolIndex = (*m_ppBuildingPoolInterface)->GetObjectIndexSafe(pGameInterface);
 
-    if (poolIndex == -1)
+    // GTA LVIV BETA: a limit adjuster (fastman92) can make GTA's building pool larger than our table
+    if (poolIndex == -1 || static_cast<size_t>(poolIndex) >= m_buildingPool.entities.size())
         return nullptr;
 
     return m_buildingPool.entities[static_cast<size_t>(poolIndex)].pClientEntity;
@@ -130,7 +135,7 @@ void CBuildingsPoolSA::RemoveBuilding(CBuilding* pBuilding)
     CBuildingSAInterface* pInterface = pBuilding->GetBuildingInterface();
 
     std::int32_t iElementIndexInPool = (*m_ppBuildingPoolInterface)->GetObjectIndexSafe(pInterface);
-    if (iElementIndexInPool == -1)
+    if (iElementIndexInPool == -1 || static_cast<size_t>(iElementIndexInPool) >= m_buildingPool.entities.size())
         return;
 
     // Remove references to allocated matrix

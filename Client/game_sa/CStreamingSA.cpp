@@ -76,7 +76,7 @@ CStreamingSA::CStreamingSA()
     std::memcpy(m_StreamNames.data(), defaultStreamingNames,
         sizeof(SStreamName) *  std::min(m_StreamNames.size(), (size_t)VAR_DefaultStreamHandlersMaxCount));
     std::memcpy(m_Imgs.data(), defaultAchiveInfo,
-        sizeof(CArchiveInfo) * std::min(m_Imgs.size(), (size_t)VAR_DefaultMaxArchives));
+        sizeof(CArchiveInfo) * std::min(m_Imgs.size(), std::size(defaultAchiveInfo)));  // GTA's own array has 8 entries
 }
 
 void CStreamingSA::SetArchivesNum(size_t imagesNum)

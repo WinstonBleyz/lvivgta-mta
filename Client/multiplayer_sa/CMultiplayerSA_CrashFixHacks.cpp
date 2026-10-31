@@ -2156,11 +2156,43 @@ static void _declspec(naked) HOOK_CFire_ProcessFire()
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //
+// GTA LVIV BETA: CTrain::InitTrains (call at 0x6F751C)
+//
+// For each station InitTrains searches the closest rail node over all tracks, but reads
+// the result from track 0's node array. With a custom tracks.dat the index can be past
+// the end of track 0 -> invalid read at 0x6F7524. Clamp the index to track 0.
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+#define CALLPOS_CTrain_InitTrains_FindClosestTrackNode 0x6F751C
+#define FUNC_CTrain_FindClosestTrackNode               0x6F6BD0
+#define ARRAY_NumRailTrackNodes_Lviv                   0xC38014
+
+struct SStationPosition
+{
+    float fX, fY, fZ;
+};
+
+static int __cdecl CTrain_InitTrains_FindClosestTrackNode(SStationPosition position, int* pOutTrack)
+{
+    using FindClosest = int(__cdecl*)(SStationPosition, int*);
+    int       iNode = reinterpret_cast<FindClosest>(FUNC_CTrain_FindClosestTrackNode)(position, pOutTrack);
+    const int iNumTrack0Nodes = reinterpret_cast<int*>(ARRAY_NumRailTrackNodes_Lviv)[0];
+    if (iNode < 0 || iNode >= iNumTrack0Nodes)
+        iNode = iNumTrack0Nodes > 0 ? iNumTrack0Nodes - 1 : 0;
+    return iNode;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
 // Setup hooks for CrashFixHacks
 //
 ////////////////////////////////////////////////////////////////////////
 void CMultiplayerSA::InitHooks_CrashFixHacks()
 {
+    // GTA LVIV BETA: redirect the station-node lookup in CTrain::InitTrains (rel32 call)
+    MemPut<DWORD>(CALLPOS_CTrain_InitTrains_FindClosestTrackNode + 1,
+                  reinterpret_cast<DWORD>(&CTrain_InitTrains_FindClosestTrackNode) - (CALLPOS_CTrain_InitTrains_FindClosestTrackNode + 5));
+
     EZHookInstall(CrashFix_Misc1);
     EZHookInstall(CrashFix_Misc2);
     // EZHookInstall ( CrashFix_Misc3 );

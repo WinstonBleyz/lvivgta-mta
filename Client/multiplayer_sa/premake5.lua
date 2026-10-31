@@ -10,7 +10,10 @@ project "Multiplayer SA"
 	-- Falling back to the old, C++14 implementing fixes this
 	-- See https://developercommunity.visualstudio.com/content/problem/549628/stack-access-broken-in-naked-function.html
 	-- We're not aware of any workaround to avoid rewriting multiplayer_sa
-	cppdialect "C++17" -- GTA LVIV BETA: VS 2026 dropped <experimental/filesystem> (C++14) 
+	cppdialect "C++17" -- GTA LVIV BETA: VS 2026 dropped <experimental/filesystem> (C++14)
+	-- GTA LVIV BETA: TIMING_CHECKPOINT inside naked hooks (HOOK_Idle) spills to [ebp-4] of GTA's frame
+	-- with newer compilers -> crash; the profiling checkpoints are not needed for the game.
+	defines { "WITH_TIMING_CHECKPOINTS=0" }
 
 	filter "system:windows"
 		includedirs { "../../vendor/sparsehash/src/windows" }

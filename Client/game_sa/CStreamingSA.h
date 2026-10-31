@@ -14,7 +14,7 @@
 #include <game/CStreaming.h>
 
 #define VAR_DefaultStreamHandlersMaxCount 32
-#define VAR_DefaultMaxArchives            8
+#define VAR_DefaultMaxArchives            32  // GTA LVIV BETA: was 8 (6 used by GTA itself); LVIV gta.dat adds 4 IMGs
 
 #define FUNC_CStreaming__RequestModel            0x4087E0
 #define FUNC_LoadAllRequestedModels              0x40EA10
