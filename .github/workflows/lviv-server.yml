@@ -1,0 +1,38 @@
+name: GTA LVIV BETA Linux server
+
+# Builds the custom MTA 1.6 Linux x64 server that matches the GTA LVIV BETA client
+# (MTASA_VERSION_TYPE = VERSION_TYPE_UNSTABLE in Shared/sdk/version.h).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/multitheftauto/mtasa-blue-build:1.6.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build server
+        run: ./linux-build.sh --arch=x64
+
+      - name: Add developer net module
+        run: |
+          mkdir -p Bin/server/x64
+          curl -fsSL -o Bin/server/x64/net.so https://mirror-cdn.multitheftauto.com/bdata/1.6/net_64.so
+
+      - name: Package
+        run: |
+          mkdir -p out/lviv-server/x64 out/lviv-server/mods/deathmatch
+          cp Bin/server/mta-server64 out/lviv-server/
+          # Same layout as the official tarball: x64/{core,deathmatch,dbconmy,net,xmll}.so
+          find Bin/server -name '*.so' ! -name '*_d.so' -exec cp {} out/lviv-server/x64/ \;
+          find Bin/server -name '*.so' -o -name 'mta-server64' | sort > out/lviv-server/FILES.txt
+          cp LICENSE out/lviv-server/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lviv-server-linux-x64
+          path: out/lviv-server/

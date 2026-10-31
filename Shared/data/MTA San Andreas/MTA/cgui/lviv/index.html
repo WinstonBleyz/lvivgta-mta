@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>GTA LVIV BETA</title>
+<!--
+  GTA LVIV BETA main menu. Rendered by the client's built-in CEF (core/CLvivMenu.cpp).
+  JS -> native: mta.triggerEvent("lviv", action)   actions: ready connect retry cancel settings resume disconnect quit
+  native -> JS: window.lvivNative.setState({...})    (connection state + real server status)
+-->
+<style>
+:root{--accent:#1d9bff;--accent2:#56cdff;--gold:#ffd64e;--text:#edf6ff;--muted:#94a9bd;--u:1px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#020611;color:var(--text);font-family:"Segoe UI",Arial,sans-serif;overflow:hidden;user-select:none}
+button{font:inherit;cursor:pointer}
+body{display:grid;place-items:center}
+.backdrop{position:fixed;inset:-40px;background:url(menu_bg.webp) center/cover;filter:blur(28px) brightness(.45);z-index:0}
+.app{position:relative;z-index:1;aspect-ratio:1672/941;width:min(100vw,calc(100vh*1672/941));overflow:hidden;background:#081220;box-shadow:0 0 70px #000a;isolation:isolate}
+.art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:filter .45s}
+.hotspot{position:absolute;z-index:3;padding:0;border:1px solid transparent;color:transparent;background:transparent;border-radius:calc(17*var(--u));transition:background .2s,border-color .2s,box-shadow .2s;overflow:hidden}
+.hotspot:hover{background:rgba(28,153,255,.13);border-color:rgba(100,202,255,.78);box-shadow:0 0 calc(30*var(--u)) #048dff59,inset 0 0 calc(22*var(--u)) #0479cc55}
+.hotspot::after{content:'';position:absolute;inset:0;opacity:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.10),transparent);transform:translateX(-95%);transition:transform .5s,opacity .4s}
+.hotspot:hover::after{opacity:1;transform:translateX(95%)}
+.hotspot:active{transform:scale(.99)}
+.hot-connect{left:1.95%;top:42.1%;width:22.3%;height:7.5%}.hot-servers{left:1.95%;top:50.1%;width:22.3%;height:7.5%}
+.hot-settings{left:1.95%;top:58.2%;width:22.3%;height:7.6%}.hot-exit{left:1.95%;top:66.3%;width:22.3%;height:7.5%}
+.hot-servercard{left:1.7%;top:78.7%;width:21.6%;height:17.4%;border-radius:calc(18*var(--u))}
+.hot-news{left:76.5%;top:38.4%;width:21.9%;height:5%}.hot-news1{left:78.1%;top:44.1%;width:20%;height:9.5%}
+.hot-news2{left:78.1%;top:53.4%;width:20%;height:9.5%}.hot-news3{left:78.1%;top:62.6%;width:20%;height:10.2%}
+/* Live status card drawn over the concept's static "1248" */
+.online{position:absolute;z-index:4;left:85%;top:3.3%;width:13.6%;height:9.8%;border-radius:calc(16*var(--u));background:linear-gradient(140deg,#0a1626f7,#050c17f7);border:1px solid #ffffff1a;box-shadow:0 calc(10*var(--u)) calc(25*var(--u)) #0008;display:flex;align-items:center;gap:calc(14*var(--u));padding:0 calc(18*var(--u));cursor:pointer}
+.online svg{width:calc(34*var(--u));height:calc(34*var(--u));fill:#e9f3ff;flex:none}
+.online .txt{flex:1;min-width:0;text-align:center}
+.online .st{font-size:calc(11*var(--u));font-weight:800;letter-spacing:.06em;color:#9aa9b8;display:flex;align-items:center;justify-content:center;gap:calc(5*var(--u))}
+.online .st i{width:calc(7*var(--u));height:calc(7*var(--u));border-radius:50%;background:#7c8a99}
+.online.on .st{color:#3ee08f}.online.on .st i{background:#3ee08f;box-shadow:0 0 calc(8*var(--u)) #3ee08f}
+.online.off .st{color:#ff6b6b}.online.off .st i{background:#ff6b6b}
+.online .num{font-size:calc(27*var(--u));font-weight:900;line-height:1.05;white-space:nowrap}
+.online .lbl{font-size:calc(11*var(--u));font-weight:800;letter-spacing:.06em;color:#cfe0f0}
+.online .bars{display:flex;align-items:flex-end;gap:calc(3*var(--u));height:calc(30*var(--u))}
+.online .bars b{width:calc(6*var(--u));border-radius:2px;background:#1d9bff}
+.online .bars b:nth-child(1){height:35%}.online .bars b:nth-child(2){height:65%}.online .bars b:nth-child(3){height:100%}
+.online.off .bars b,.online.unknown .bars b{background:#3a4656}
+/* In-game: the first menu button becomes "Продовжити гру" */
+.ingame-btn{position:absolute;z-index:4;left:1.95%;top:42.1%;width:22.3%;height:7.5%;display:none;align-items:center;gap:calc(22*var(--u));padding:0 calc(26*var(--u));border-radius:calc(14*var(--u));border:2px solid #2f9dff;background:linear-gradient(100deg,#0a3f86f2,#06224af2);box-shadow:0 0 calc(24*var(--u)) #1d7fff88;color:#fff;text-align:left}
+.ingame-btn svg{width:calc(34*var(--u));height:calc(34*var(--u));fill:#7fc4ff;flex:none}
+.ingame-btn strong{display:block;font-size:calc(17*var(--u));font-weight:900;letter-spacing:.02em}
+.ingame-btn span{display:block;font-size:calc(13*var(--u));color:#b9d4ee;margin-top:calc(3*var(--u))}
+.ingame-btn:hover{filter:brightness(1.15)}
+.app.ingame .ingame-btn{display:flex}
+.version{position:absolute;z-index:4;left:2.1%;top:1.9%;font-size:calc(19*var(--u));color:#e9f2fb;background:#000;padding:0 calc(6*var(--u));display:none}
+.scrim{position:absolute;z-index:10;inset:0;background:linear-gradient(100deg,rgba(1,6,14,.45),rgba(1,5,14,.73));opacity:0;pointer-events:none;transition:opacity .3s}
+.app.modal-on .scrim{opacity:1;pointer-events:auto;backdrop-filter:blur(6px)}
+.app.modal-on .art{filter:brightness(.65)}
+.app.modal-on .hotspot,.app.modal-on .online,.app.modal-on .ingame-btn{pointer-events:none}
+.panel{z-index:11;position:absolute;right:2.2%;top:7%;height:86%;width:min(calc(850*var(--u)),64%);display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateX(35px) scale(.988);transition:opacity .28s,transform .32s;background:linear-gradient(145deg,rgba(10,26,46,.98),rgba(3,9,18,.985) 68%);border:1px solid #4386b174;box-shadow:0 35px 100px #000b,0 0 45px #087ee529;overflow:hidden;border-radius:calc(23*var(--u));font-size:calc(14*var(--u))}
+.panel:before{content:'';position:absolute;height:4px;left:24px;right:24px;top:0;background:linear-gradient(90deg,transparent,var(--accent),var(--gold),transparent);opacity:.8}
+.panel.open{opacity:1;pointer-events:auto;transform:none}
+.panel-head{padding:calc(29*var(--u)) calc(34*var(--u)) calc(14*var(--u));display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid #ffffff15}
+.eyebrow{text-transform:uppercase;letter-spacing:.21em;font-size:calc(11*var(--u));font-weight:900;color:var(--accent2);margin-bottom:8px}
+.panel h1{font-size:calc(36*var(--u));line-height:1.06;letter-spacing:-.03em;margin:0 0 6px;font-weight:900}
+.panel-head p{font-size:calc(14*var(--u));color:var(--muted);margin:0}
+.x{width:calc(40*var(--u));height:calc(40*var(--u));flex:none;background:#ffffff12;border:1px solid #ffffff26;color:#fff;border-radius:11px;font-size:calc(22*var(--u));line-height:1}
+.x:hover{background:#e33a4855;border-color:#e33a4899}
+.panel-body{padding:calc(18*var(--u)) calc(34*var(--u)) calc(26*var(--u));overflow-y:auto;flex:1}
+.panel-body::-webkit-scrollbar{width:6px}.panel-body::-webkit-scrollbar-thumb{background:#3588b5;border-radius:4px}
+.btn{border:1px solid #ffffff2a;border-radius:11px;padding:calc(12*var(--u)) calc(17*var(--u));background:#ffffff12;color:#fff;font-weight:800;font-size:calc(13*var(--u));transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.btn:hover{background:#ffffff26;transform:translateY(-1px)}
+.btn.blue{border-color:#36b5ff;background:linear-gradient(115deg,#0a81dd,#0055c8);box-shadow:0 5px 20px #0067cc44}
+.btn.blue:hover{background:linear-gradient(115deg,#22acff,#0872ee)}
+.btn.red{border-color:#ff6b6b88;background:#c4303a55}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.section-label{font-size:calc(11*var(--u));font-weight:900;color:#7eacc9;text-transform:uppercase;letter-spacing:.15em;margin:16px 0 10px}
+.server-row{display:flex;align-items:center;gap:14px;border:1px solid #35aaf5a8;border-radius:13px;background:#15314fd9;box-shadow:0 0 18px #1d9bff18;padding:14px}
+.server-icon{width:calc(50*var(--u));height:calc(50*var(--u));border-radius:12px;flex:none;background:#08142a url(logo.png) center/80% no-repeat;border:1px solid #278dea7c}
+.server-copy{min-width:0;flex:1}.server-copy strong{display:block;font-size:calc(16*var(--u));margin-bottom:4px}.server-copy span{display:block;font-size:calc(12*var(--u));color:#92a7bd}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff20;background:#ffffff0c;padding:5px 10px;border-radius:30px;font-size:calc(11*var(--u));font-weight:800;color:#b3d6ef}
+.pill.yellow{background:#fbc43416;color:#ffcf58;border-color:#fbc43451}.pill.green{background:#26c37f18;color:#6ff7b9;border-color:#26c37f66}.pill.red{background:#ff5b5b18;color:#ff8f8f;border-color:#ff5b5b66}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stat{border:1px solid #ffffff17;background:#ffffff08;border-radius:12px;padding:12px 14px}.stat small{display:block;color:#7ba4c3;font-size:calc(11*var(--u));font-weight:800;letter-spacing:.08em;text-transform:uppercase}.stat b{display:block;font-size:calc(20*var(--u));margin-top:4px}
+.row-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.info-block{padding:14px 15px;border-radius:12px;border:1px solid #3da8e74d;background:#1c548c20;font-size:calc(13*var(--u));line-height:1.6;color:#bdd7ee;margin-top:16px}
+.hero-card{border:1px solid #34a9ea82;background:linear-gradient(115deg,#064679aa,#07182d);border-radius:17px;padding:20px;margin:6px 0 17px}
+.hero-card h2{font-size:calc(25*var(--u));margin:6px 0}.hero-card p{color:#acc7dd;font-size:calc(14*var(--u));line-height:1.6;margin:0}
+.news-row{display:flex;gap:12px;cursor:pointer;padding:13px;border:1px solid #ffffff19;background:#ffffff08;border-radius:14px;margin-bottom:10px}.news-row:hover{border-color:#35b0f8}
+.news-visual{width:calc(90*var(--u));min-width:calc(90*var(--u));height:calc(66*var(--u));border-radius:9px;background:url(menu_bg.webp) center 30%/cover}
+.news-row strong{font-size:calc(14*var(--u));display:block;margin:4px 0 6px}.news-row small{color:#7ba4c3;font-size:calc(11*var(--u))}.news-row p{font-size:calc(12*var(--u));color:#92a9bc;margin:0;line-height:1.4}
+.connection-view{text-align:center;padding-top:20px}
+.spinner{width:calc(74*var(--u));height:calc(74*var(--u));margin:8px auto 17px;border-radius:50%;border:4px solid #ffffff1c;border-top-color:#2ea8ff;animation:spin 1s linear infinite}
+.spinner.done{animation:none;border-color:#36d79c;display:grid;place-items:center;color:#52e0a2;font-size:calc(34*var(--u))}
+.spinner.fail{animation:none;border-color:#ff6b6b;display:grid;place-items:center;color:#ff8f8f;font-size:calc(34*var(--u))}
+@keyframes spin{to{transform:rotate(360deg)}}
+.connection-view h2{font-size:calc(26*var(--u));margin:6px 0}.connection-view p{font-size:calc(14*var(--u));color:#a2bbd1;line-height:1.6}
+.toast{position:absolute;z-index:24;left:50%;bottom:4%;transform:translate(-50%,16px);background:#091b31f5;border:1px solid #41a5e899;border-radius:12px;color:#fff;padding:12px 18px;font-size:calc(14*var(--u));font-weight:800;box-shadow:0 15px 40px #0008;opacity:0;pointer-events:none;transition:.25s;text-align:center;max-width:90%}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="backdrop"></div>
+<main id="app" class="app">
+  <img class="art" src="menu_bg.webp" alt="" draggable="false">
+  <button class="hotspot hot-connect" data-action="connect" title="Підключення"></button>
+  <button class="ingame-btn" data-action="resume"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><div><strong>ПРОДОВЖИТИ ГРУ</strong><span>Повернутися на сервер</span></div></button>
+  <button class="hotspot hot-servers" data-view="servers" title="Список серверів"></button>
+  <button class="hotspot hot-settings" data-action="settings" title="Налаштування"></button>
+  <button class="hotspot hot-exit" data-view="exit" title="Вихід"></button>
+  <button class="hotspot hot-servercard" data-view="project" title="Львівський 01"></button>
+  <button class="hotspot hot-news" data-view="news" title="Усі новини"></button>
+  <button class="hotspot hot-news1" data-news="0"></button>
+  <button class="hotspot hot-news2" data-news="1"></button>
+  <button class="hotspot hot-news3" data-news="2"></button>
+  <div class="online unknown" id="online" data-view="servers">
+    <svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13Zm8 0c-.3 0-.6 0-1 .1a4.2 4.2 0 0 1 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5Z"/></svg>
+    <div class="txt"><div class="st"><i></i><span id="onlineState">НЕМАЄ ДАНИХ</span></div><div class="num" id="onlineNum">—</div><div class="lbl" id="onlineLbl">ГРАВЦІВ</div></div>
+    <div class="bars"><b></b><b></b><b></b></div>
+  </div>
+  <div class="scrim" id="scrim"></div>
+  <section class="panel" id="panel">
+    <header class="panel-head"><div><div class="eyebrow" id="panelEyebrow">GTA LVIV BETA</div><h1 id="panelTitle"></h1><p id="panelSubtitle"></p></div><button class="x" id="close">×</button></header>
+    <div class="panel-body" id="panelBody"></div>
+  </section>
+  <div id="toast" class="toast"></div>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const app = $('#app'), panel = $('#panel'), body = $('#panelBody'), toast = $('#toast');
+
+const NEWS = [
+  {date:'12 КВІТНЯ 2025', title:'ВІДКРИТА BETA LVIV GTA', short:'Нові можливості, унікальна атмосфера Львова та багато іншого.',
+   detail:'Ласкаво просимо до LVIV GTA BETA! Українська RolePlay-гра на вулицях Львова. Слідкуйте за розвитком сервера та новими можливостями.'},
+  {date:'5 КВІТНЯ 2025', title:'ВЕСНЯНИЙ СЕЗОН', short:'Додано нові івенти, роботи та унікальні предмети.',
+   detail:'Нові ігрові події, роботи та предмети для гравців. Деталі — в спільноті проєкту.'},
+  {date:'28 БЕРЕЗНЯ 2025', title:'ТЕХНІЧНІ РОБОТИ', short:'Покращено стабільність серверів та оптимізовано клієнт.',
+   detail:'Покращено стабільність сервера та оптимізовано клієнт GTA LVIV BETA.'}
+];
+
+// Native bridge
+const native = (action) => { try { if (window.mta && mta.triggerEvent) mta.triggerEvent('lviv', action); } catch (e) {} };
+let S = {ingame:false, connecting:false, failed:false, networkReady:false,
+         server:{host:'149.50.108.108', port:28570, status:'unknown', players:0, maxPlayers:0, ping:0, name:''}, version:''};
+let view = '', newsIndex = 0, wantConnectView = false;
+
+window.lvivNative = {
+  setState(next) {
+    const wasConnecting = S.connecting;
+    S = next;
+    app.classList.toggle('ingame', !!S.ingame);
+    renderOnline();
+    if (S.connecting && !wasConnecting) { wantConnectView = true; open('connection'); }
+    if (view === 'connection' || view === 'servers' || view === 'exit') render();
+    if (S.ingame && view === 'connection') close();
+  }
+};
+
+function scale() { const w = app.getBoundingClientRect().width; document.documentElement.style.setProperty('--u', (w / 1672) + 'px'); }
+window.addEventListener('resize', scale); scale();
+
+function toastMsg(m) { toast.textContent = m; toast.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => toast.classList.remove('show'), 3000); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function heading(k, t, s) { $('#panelEyebrow').textContent = k; $('#panelTitle').textContent = t; $('#panelSubtitle').textContent = s; }
+function endpoint() { return S.server.host + ':' + S.server.port; }
+
+function statusInfo() {
+  const sv = S.server;
+  if (sv.status === 'online') return {cls:'green', text:'ОНЛАЙН', players: sv.players + ' / ' + sv.maxPlayers, ping: sv.ping + ' мс'};
+  if (sv.status === 'offline') return {cls:'red', text:'ОФЛАЙН', players:'Немає даних', ping:'—'};
+  return {cls:'', text:'НЕМАЄ ДАНИХ', players:'Немає даних', ping:'—'};
+}
+
+function renderOnline() {
+  const el = $('#online'), sv = S.server;
+  el.className = 'online ' + (sv.status === 'online' ? 'on' : sv.status === 'offline' ? 'off' : 'unknown');
+  $('#onlineState').textContent = sv.status === 'online' ? 'ОНЛАЙН' : sv.status === 'offline' ? 'ОФЛАЙН' : 'НЕМАЄ ДАНИХ';
+  $('#onlineNum').textContent = sv.status === 'online' ? String(sv.players) : '—';
+  $('#onlineLbl').textContent = sv.status === 'online' ? 'ГРАВЦІВ' : 'СЕРВЕР';
+}
+
+function open(v) { view = v; app.classList.add('modal-on'); panel.classList.add('open'); render(); }
+function close() { view = ''; app.classList.remove('modal-on'); panel.classList.remove('open'); }
+function go(v) { view = v; render(); }
+
+function render() {
+  ({servers:renderServers, connection:renderConnection, news:renderNews, article:renderArticle,
+    project:renderProject, exit:renderExit})[view]?.();
+}
+
+function renderServers() {
+  heading('МЕРЕЖА • LVIV GTA', 'Список серверів', 'Офіційний сервер проєкту.');
+  const st = statusInfo();
+  body.innerHTML = `
+    <div class="section-label">СЕРВЕРІВ: 1</div>
+    <div class="server-row"><div class="server-icon"></div>
+      <div class="server-copy"><strong>${esc(S.server.name || 'LVIV GTA BETA')}</strong><span>${esc(endpoint())} • Український RolePlay</span></div>
+      <span class="pill ${st.cls}">${st.text}</span></div>
+    <div class="stats">
+      <div class="stat"><small>Гравці</small><b>${esc(st.players)}</b></div>
+      <div class="stat"><small>Пінг</small><b>${esc(st.ping)}</b></div>
+      <div class="stat"><small>Версія</small><b>MTA 1.6</b></div>
+    </div>
+    <div class="row-actions">
+      ${S.ingame ? '<button class="btn blue" data-act="resume">▶ ПРОДОВЖИТИ ГРУ</button>'
+                 : `<button class="btn blue" data-act="connect" ${S.connecting ? 'disabled' : ''}>▶ ПІДКЛЮЧИТИСЯ</button>`}
+    </div>
+    <div class="info-block">GTA LVIV BETA підключається лише до офіційного сервера проєкту. Дані про сервер оновлюються автоматично.</div>`;
+  bindActs();
+}
+
+function renderConnection() {
+  heading('МЕРЕЖА • ПІДКЛЮЧЕННЯ', 'Підключення', endpoint());
+  let icon, title, text, buttons;
+  if (S.connecting) {
+    icon = '<div class="spinner"></div>'; title = 'Підключення до LVIV GTA BETA';
+    text = 'Встановлюємо з’єднання з офіційним сервером…';
+    buttons = '<button class="btn" data-act="cancel">СКАСУВАТИ</button>';
+  } else if (S.failed) {
+    icon = '<div class="spinner fail">!</div>'; title = 'Не вдалося підключитися';
+    text = 'Сервер не відповів або відхилив підключення. Перевірте інтернет і спробуйте ще раз.';
+    buttons = '<button class="btn blue" data-act="retry">↻ ПОВТОРИТИ ПІДКЛЮЧЕННЯ</button><button class="btn" data-go="servers">СТАТУС СЕРВЕРА</button>';
+  } else if (S.ingame) {
+    icon = '<div class="spinner done">✓</div>'; title = 'Ви на сервері'; text = 'З’єднання встановлено.';
+    buttons = '<button class="btn blue" data-act="resume">▶ ПРОДОВЖИТИ ГРУ</button>';
+  } else {
+    icon = '<div class="spinner fail">–</div>'; title = 'Не підключено'; text = 'Натисніть, щоб підключитися до LVIV GTA BETA.';
+    buttons = '<button class="btn blue" data-act="connect">▶ ПІДКЛЮЧИТИСЯ</button>';
+  }
+  body.innerHTML = `<div class="connection-view">${icon}<h2>${title}</h2><p>${text}</p><div class="row-actions" style="justify-content:center">${buttons}</div></div>`;
+  bindActs();
+}
+
+function renderNews() {
+  heading('LVIV GTA • ОНОВЛЕННЯ', 'Новини проєкту', 'Останні новини, події та оновлення клієнта.');
+  body.innerHTML = '<div class="section-label">ОСТАННІ ПУБЛІКАЦІЇ</div>' + NEWS.map((n, i) =>
+    `<article class="news-row" data-article="${i}"><div class="news-visual"></div><div><small>${n.date}</small><strong>${n.title}</strong><p>${n.short}</p></div></article>`).join('');
+  $$('[data-article]', body).forEach(el => el.onclick = () => { newsIndex = +el.dataset.article; go('article'); });
+}
+
+function renderArticle() {
+  const n = NEWS[newsIndex];
+  heading(n.date, 'Новини проєкту', 'GTA LVIV BETA');
+  body.innerHTML = `<div class="hero-card" style="min-height:160px;background:linear-gradient(110deg,#0c2343aa,#04142244),url(menu_bg.webp) center 36%/cover"><div class="eyebrow">${n.date}</div><h2 style="text-shadow:0 2px 10px #000">${n.title}</h2></div>
+    <p style="line-height:1.8;color:#c5d9e8">${n.detail}</p><div class="row-actions"><button class="btn blue" data-go="news">← ПОВЕРНУТИСЯ ДО НОВИН</button></div>`;
+  bindActs();
+}
+
+function renderProject() {
+  heading('ГОЛОВНИЙ ПРОЄКТ • LVIV GTA', 'Львівський 01', 'Український сервер у розробці.');
+  body.innerHTML = `<div class="hero-card" style="padding:25px;background:linear-gradient(105deg,#0a234dc9,#041526aa),url(menu_bg.webp) center 27%/cover"><span class="pill yellow">⚙ В РОЗРОБЦІ</span><h2>ЛЬВІВСЬКИЙ 01</h2><p>Атмосфера рідного міста. Власна історія. Твій новий світ у MTA:SA.</p></div>
+    <div class="row-actions"><button class="btn blue" data-go="servers">СТАТУС СЕРВЕРА</button></div>`;
+  bindActs();
+}
+
+function renderExit() {
+  if (S.ingame) {
+    heading('GTA LVIV BETA', 'Вийти?', 'Можна відключитися від сервера або закрити клієнт.');
+    body.innerHTML = `<div class="hero-card"><h2>Ви зараз на сервері</h2><p>Відключення поверне вас у головне меню.</p></div>
+      <div class="row-actions"><button class="btn blue" data-act="resume">▶ ПРОДОВЖИТИ ГРУ</button><button class="btn" data-act="disconnect">ВІДКЛЮЧИТИСЯ</button><button class="btn red" data-act="quit">ЗАКРИТИ КЛІЄНТ</button></div>`;
+  } else {
+    heading('GTA LVIV BETA', 'Вийти з клієнта?', 'Клієнт буде закрито.');
+    body.innerHTML = `<div class="hero-card"><h2>Дякуємо, що граєте!</h2><p>До зустрічі на вулицях Львова.</p></div>
+      <div class="row-actions"><button class="btn" data-close>← ГОЛОВНЕ МЕНЮ</button><button class="btn red" data-act="quit">ЗАКРИТИ КЛІЄНТ</button></div>`;
+  }
+  bindActs();
+}
+
+function act(a) {
+  if (a === 'connect' || a === 'retry') { open('connection'); }
+  if (a === 'resume') close();
+  native(a);
+}
+
+function bindActs() {
+  $$('[data-act]', body).forEach(b => b.onclick = () => act(b.dataset.act));
+  $$('[data-go]', body).forEach(b => b.onclick = () => go(b.dataset.go));
+  $$('[data-close]', body).forEach(b => b.onclick = close);
+}
+
+$$('[data-action]').forEach(b => b.addEventListener('click', () => {
+  const a = b.dataset.action;
+  if (a === 'connect' && S.ingame) { act('resume'); return; }
+  act(a);
+}));
+$$('[data-view]').forEach(b => b.addEventListener('click', () => open(b.dataset.view)));
+$$('[data-news]').forEach(b => b.addEventListener('click', () => { newsIndex = +b.dataset.news; open('article'); }));
+$('#close').onclick = close; $('#scrim').onclick = close;
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && view) close(); });
+
+renderOnline();
+native('ready');
+})();
+</script>
+</body>
+</html>
