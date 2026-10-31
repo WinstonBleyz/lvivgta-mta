@@ -852,6 +852,7 @@ HWND CCore::GetHookedWindow()
 
 void CCore::HideMainMenu()
 {
+    WriteDebugEvent("Lviv: CCore::HideMainMenu");  // GTA LVIV BETA: menu diagnostics
     m_pLocalGUI->GetMainMenu()->SetVisible(false);
 }
 

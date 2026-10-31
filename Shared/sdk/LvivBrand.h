@@ -20,6 +20,10 @@
 #define LVIV_EXE_NAME_DEBUG     "GTA LVIV BETA_d.exe"
 #define LVIV_EXE_NAME_DEBUG_W   L"GTA LVIV BETA_d.exe"
 
+// Discord Rich Presence (application "GTA LVIV BETA", art asset "lviv_logo")
+#define LVIV_DISCORD_APP_ID     "1566160708104757248"
+#define LVIV_DISCORD_ASSET      "lviv_logo"
+
 // The only server this client may connect to
 #define LVIV_SERVER_HOST        "149.50.108.108"
 #define LVIV_SERVER_PORT        28570

@@ -128,7 +128,8 @@ bool CLvivMenu::Create()
     m_pBrowser->MoveToBack();
     m_pBrowser->SetVisible(false);
 
-    m_pWebView->LoadURL(LVIV_UI_START_URL, false);
+    // The page is loaded in Events_OnCreated: CEF creates the browser asynchronously and
+    // LoadURL fails until then
 
     in_addr address;
     address.s_addr = inet_addr(LVIV_SERVER_HOST);
@@ -146,7 +147,25 @@ void CLvivMenu::DoPulse(bool bMenuVisible, float fAlpha, bool bIngame)
     m_bIngame = bIngame;
     m_pBrowser->SetVisible(bMenuVisible);
     m_pBrowser->SetAlpha(Clamp(0.f, fAlpha, 1.f));
-    m_pWebView->SetRenderingPaused(!bMenuVisible);
+
+    // The menu needs mouse only. A focused web view would receive all game keyboard input
+    // (CKeyBinds forwards keys to the focused view), which also re-toggled the menu on Esc.
+    // Only drop MTA's keyboard routing; CefBrowserHost::SetFocus(false) would take OS focus away from
+    // the game window, and a fullscreen game minimizes when it loses focus.
+    if (auto pWebCore = CCore::GetSingleton().GetWebCoreUnchecked(); pWebCore && pWebCore->GetFocusedWebView() == m_pWebView)
+        pWebCore->SetFocusedWebView(nullptr);
+
+    // Rendering is never paused: the texture is recreated on device resets (connect, alt-tab)
+    // and CEF only repaints on changes, so force a repaint whenever the menu is shown again
+    if (bMenuVisible != m_bWasVisible)
+        WriteDebugEvent(SString("CLvivMenu: visible=%d alpha=%.2f ingame=%d ready=%d texture=%p", bMenuVisible, fAlpha, bIngame, m_bDocumentReady,
+                                m_pWebView->GetTexture()));
+    if (bMenuVisible && !m_bWasVisible && m_bDocumentReady)
+    {
+        m_pWebView->ExecuteJavascript("window.lvivNative && window.lvivNative.repaint && window.lvivNative.repaint();");
+        PushState(true);
+    }
+    m_bWasVisible = bMenuVisible;
 
     // Detect a finished connect attempt that did not get us into the game
     const bool bConnecting = CCore::GetSingleton().GetConnectManager()->IsConnecting();
@@ -204,6 +223,7 @@ void CLvivMenu::ConnectToOfficialServer()
 
 void CLvivMenu::HandleAction(const std::string& strAction)
 {
+    WriteDebugEvent(SString("CLvivMenu: action %s", strAction.c_str()));
     CMainMenu* pMainMenu = CCore::GetSingleton().GetLocalGUI()->GetMainMenu();
     WatchDogUserDidInteractWithMenu();
 
@@ -271,6 +291,12 @@ void CLvivMenu::PushState(bool bForce)
 
     m_strLastState = strState;
     m_pWebView->ExecuteJavascript("window.lvivNative && window.lvivNative.setState(" + strState + ");");
+}
+
+void CLvivMenu::Events_OnCreated()
+{
+    if (!m_pWebView->LoadURL(LVIV_UI_START_URL, false))
+        WriteDebugEvent("CLvivMenu: LoadURL failed");
 }
 
 void CLvivMenu::Events_OnDocumentReady(const SString& strURL)

@@ -772,6 +772,7 @@ void CMainMenu::OnEscapePressedOffLine()
 
 void CMainMenu::SetVisible(bool bVisible, bool bOverlay, bool bFrameDelay)
 {
+    WriteDebugEvent(SString("Lviv: CMainMenu::SetVisible(%d, overlay=%d) fade=%d ingame=%d", bVisible, bOverlay, m_ucFade, m_bIsIngame));  // GTA LVIV BETA: menu diagnostics
     CMultiplayer* pMultiplayer = CCore::GetSingleton().GetMultiplayer();
     CQuestionBox* pQuestionBox = CCore::GetSingleton().GetLocalGUI()->GetMainMenu()->GetQuestionWindow();
     pMultiplayer->DisablePadHandler(bVisible);

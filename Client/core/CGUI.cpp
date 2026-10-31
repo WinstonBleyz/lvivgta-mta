@@ -478,6 +478,7 @@ void CLocalGUI::SetMainMenuVisible(bool bVisible)
         // is shown, and restores the mod input handlers when the menu is hidden again.
         // This is needed for things like pressing escape when changing a key bind
 
+        WriteDebugEvent(SString("Lviv: SetMainMenuVisible(%d) wasVisible=%d", bVisible, m_pMainMenu->IsVisible()));  // GTA LVIV BETA: menu diagnostics
         m_pMainMenu->SetVisible(bVisible);
 
         CGUI* pGUI = CCore::GetSingleton().GetGUI();

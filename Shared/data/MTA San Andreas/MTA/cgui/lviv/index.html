@@ -14,24 +14,42 @@
 html,body{margin:0;height:100%;background:#020611;color:var(--text);font-family:"Segoe UI",Arial,sans-serif;overflow:hidden;user-select:none}
 button{font:inherit;cursor:pointer}
 body{display:grid;place-items:center}
-.backdrop{position:fixed;inset:-40px;background:url(menu_bg.webp) center/cover;filter:blur(28px) brightness(.45);z-index:0}
+.backdrop{position:fixed;inset:-40px;background:url(menu_bg.jpg) center/cover;filter:blur(28px) brightness(.45);z-index:0}
 .app{position:relative;z-index:1;aspect-ratio:1672/941;width:min(100vw,calc(100vh*1672/941));overflow:hidden;background:#081220;box-shadow:0 0 70px #000a;isolation:isolate}
 .art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transition:filter .45s}
-.hotspot{position:absolute;z-index:3;padding:0;border:1px solid transparent;color:transparent;background:transparent;border-radius:calc(17*var(--u));transition:background .2s,border-color .2s,box-shadow .2s;overflow:hidden}
-.hotspot:hover{background:rgba(28,153,255,.13);border-color:rgba(100,202,255,.78);box-shadow:0 0 calc(30*var(--u)) #048dff59,inset 0 0 calc(22*var(--u)) #0479cc55}
-.hotspot::after{content:'';position:absolute;inset:0;opacity:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.10),transparent);transform:translateX(-95%);transition:transform .5s,opacity .4s}
-.hotspot:hover::after{opacity:1;transform:translateX(95%)}
-.hotspot:active{transform:scale(.99)}
-.hot-connect{left:1.95%;top:42.1%;width:22.3%;height:7.5%}.hot-servers{left:1.95%;top:50.1%;width:22.3%;height:7.5%}
-.hot-settings{left:1.95%;top:58.2%;width:22.3%;height:7.6%}.hot-exit{left:1.95%;top:66.3%;width:22.3%;height:7.5%}
-.hot-servercard{left:1.7%;top:78.7%;width:21.6%;height:17.4%;border-radius:calc(18*var(--u))}
-.hot-news{left:76.5%;top:38.4%;width:21.9%;height:5%}.hot-news1{left:78.1%;top:44.1%;width:20%;height:9.5%}
-.hot-news2{left:78.1%;top:53.4%;width:20%;height:9.5%}.hot-news3{left:78.1%;top:62.6%;width:20%;height:10.2%}
-/* Live status card drawn over the concept's static "1248" */
+/* Main menu buttons (drawn over the clean background) */
+.mbtn{position:absolute;z-index:3;left:2.1%;width:22.2%;height:7.2%;display:flex;align-items:center;gap:calc(26*var(--u));padding:0 calc(22*var(--u)) 0 calc(28*var(--u));
+  border-radius:calc(12*var(--u));border:1px solid #ffffff2e;background:linear-gradient(100deg,#0a1422e6,#060c16d9);box-shadow:0 calc(8*var(--u)) calc(22*var(--u)) #0009;color:#fff;text-align:left;
+  transition:transform .18s,border-color .2s,background .2s,box-shadow .2s;overflow:hidden}
+.mbtn::after{content:'';position:absolute;inset:0;opacity:0;background:linear-gradient(100deg,transparent,rgba(255,255,255,.10),transparent);transform:translateX(-95%);transition:transform .5s,opacity .4s}
+.mbtn:hover{border-color:#4fb2ffcc;background:linear-gradient(100deg,#0c2a4ef2,#081a30e6);box-shadow:0 0 calc(26*var(--u)) #1d8fff66;transform:translateX(calc(4*var(--u)))}
+.mbtn:hover::after{opacity:1;transform:translateX(95%)}
+.mbtn.primary{border:2px solid #2f9dff;background:linear-gradient(100deg,#0b4592f2,#06224af2);box-shadow:0 0 calc(26*var(--u)) #1d7fff88}
+.mbtn svg{width:calc(36*var(--u));height:calc(36*var(--u));fill:#e9f3ff;flex:none}
+.mbtn.primary svg{fill:#7fc4ff}
+.mbtn .t{flex:1;min-width:0}.mbtn strong{display:block;font-size:calc(18*var(--u));font-weight:900;letter-spacing:.02em}
+.mbtn span{display:block;font-size:calc(13.5*var(--u));color:#b9cde0;margin-top:calc(3*var(--u))}
+.mbtn i{font-style:normal;font-size:calc(26*var(--u));color:#cfe0f0;opacity:.8}
+.m-connect{top:42.6%}.m-servers{top:50.7%}.m-settings{top:58.8%}.m-exit{top:66.9%}
+/* "Львівський 01" card */
+.card01{position:absolute;z-index:3;left:1.8%;top:80.2%;width:21.6%;height:17%;border-radius:calc(16*var(--u));border:2px solid #2f9dff;
+  background:linear-gradient(0deg,#03080fe6 0%,#03080f55 55%,#0000 100%),url(card_lviv01.jpg) center/cover;box-shadow:0 0 calc(26*var(--u)) #1d7fff77;color:#fff;text-align:left;padding:0 calc(22*var(--u));display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:calc(16*var(--u))}
+.card01:hover{filter:brightness(1.12)}
+.card01 strong{font-size:calc(20*var(--u));font-weight:900;letter-spacing:.03em}.card01 span{font-size:calc(16*var(--u));font-weight:700;margin-top:calc(4*var(--u))}
+/* News panel */
+.newsbox{position:absolute;z-index:3;left:77.6%;top:39.4%;width:20.9%;height:35.4%;border-radius:calc(14*var(--u));border:1px solid #ffffff22;background:linear-gradient(160deg,#08111ded,#04090fed);box-shadow:0 calc(10*var(--u)) calc(28*var(--u)) #000a;padding:calc(14*var(--u)) calc(16*var(--u))}
+.newsbox .hd{display:flex;justify-content:space-between;align-items:center;font-size:calc(13*var(--u));font-weight:900;letter-spacing:.04em;margin-bottom:calc(10*var(--u))}
+.newsbox .hd button{background:none;border:0;color:#fff;font-weight:900;font-size:calc(13*var(--u));padding:0}
+.newsbox .hd button:hover{color:var(--accent2)}
+.nrow{display:flex;gap:calc(14*var(--u));width:100%;background:none;border:0;border-top:1px solid #ffffff14;color:#fff;text-align:left;padding:calc(9*var(--u)) 0;border-radius:6px}
+.nrow:first-of-type{border-top:0}.nrow:hover{background:#ffffff0c}
+.nrow img{width:calc(84*var(--u));height:calc(66*var(--u));object-fit:cover;border-radius:6px;flex:none}
+.nrow small{display:block;font-size:calc(11*var(--u));color:#9fb3c6}.nrow strong{display:block;font-size:calc(13.5*var(--u));font-weight:900;margin:calc(2*var(--u)) 0}
+.nrow span{display:block;font-size:calc(11.5*var(--u));color:#b7c6d4;line-height:1.3}/* Live status card drawn over the concept's static "1248" */
 .online{position:absolute;z-index:4;left:85%;top:3.3%;width:13.6%;height:9.8%;border-radius:calc(16*var(--u));background:linear-gradient(140deg,#0a1626f7,#050c17f7);border:1px solid #ffffff1a;box-shadow:0 calc(10*var(--u)) calc(25*var(--u)) #0008;display:flex;align-items:center;gap:calc(14*var(--u));padding:0 calc(18*var(--u));cursor:pointer}
 .online svg{width:calc(34*var(--u));height:calc(34*var(--u));fill:#e9f3ff;flex:none}
 .online .txt{flex:1;min-width:0;text-align:center}
-.online .st{font-size:calc(11*var(--u));font-weight:800;letter-spacing:.06em;color:#9aa9b8;display:flex;align-items:center;justify-content:center;gap:calc(5*var(--u))}
+.online .st{white-space:nowrap;font-size:calc(10.5*var(--u));font-weight:800;letter-spacing:.06em;color:#9aa9b8;display:flex;align-items:center;justify-content:center;gap:calc(5*var(--u))}
 .online .st i{width:calc(7*var(--u));height:calc(7*var(--u));border-radius:50%;background:#7c8a99}
 .online.on .st{color:#3ee08f}.online.on .st i{background:#3ee08f;box-shadow:0 0 calc(8*var(--u)) #3ee08f}
 .online.off .st{color:#ff6b6b}.online.off .st i{background:#ff6b6b}
@@ -42,17 +60,17 @@ body{display:grid;place-items:center}
 .online .bars b:nth-child(1){height:35%}.online .bars b:nth-child(2){height:65%}.online .bars b:nth-child(3){height:100%}
 .online.off .bars b,.online.unknown .bars b{background:#3a4656}
 /* In-game: the first menu button becomes "Продовжити гру" */
-.ingame-btn{position:absolute;z-index:4;left:1.95%;top:42.1%;width:22.3%;height:7.5%;display:none;align-items:center;gap:calc(22*var(--u));padding:0 calc(26*var(--u));border-radius:calc(14*var(--u));border:2px solid #2f9dff;background:linear-gradient(100deg,#0a3f86f2,#06224af2);box-shadow:0 0 calc(24*var(--u)) #1d7fff88;color:#fff;text-align:left}
+.ingame-btn{position:absolute;z-index:4;left:2.1%;top:42.6%;width:22.2%;height:7.2%;display:none;align-items:center;gap:calc(22*var(--u));padding:0 calc(26*var(--u));border-radius:calc(14*var(--u));border:2px solid #2f9dff;background:linear-gradient(100deg,#0a3f86f2,#06224af2);box-shadow:0 0 calc(24*var(--u)) #1d7fff88;color:#fff;text-align:left}
 .ingame-btn svg{width:calc(34*var(--u));height:calc(34*var(--u));fill:#7fc4ff;flex:none}
 .ingame-btn strong{display:block;font-size:calc(17*var(--u));font-weight:900;letter-spacing:.02em}
 .ingame-btn span{display:block;font-size:calc(13*var(--u));color:#b9d4ee;margin-top:calc(3*var(--u))}
 .ingame-btn:hover{filter:brightness(1.15)}
-.app.ingame .ingame-btn{display:flex}
+.app.ingame .ingame-btn{display:flex}.app.ingame .m-connect{display:none}
 .version{position:absolute;z-index:4;left:2.1%;top:1.9%;font-size:calc(19*var(--u));color:#e9f2fb;background:#000;padding:0 calc(6*var(--u));display:none}
 .scrim{position:absolute;z-index:10;inset:0;background:linear-gradient(100deg,rgba(1,6,14,.45),rgba(1,5,14,.73));opacity:0;pointer-events:none;transition:opacity .3s}
 .app.modal-on .scrim{opacity:1;pointer-events:auto;backdrop-filter:blur(6px)}
 .app.modal-on .art{filter:brightness(.65)}
-.app.modal-on .hotspot,.app.modal-on .online,.app.modal-on .ingame-btn{pointer-events:none}
+.app.modal-on .mbtn,.app.modal-on .card01,.app.modal-on .newsbox,.app.modal-on .online,.app.modal-on .ingame-btn{pointer-events:none}
 .panel{z-index:11;position:absolute;right:2.2%;top:7%;height:86%;width:min(calc(850*var(--u)),64%);display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateX(35px) scale(.988);transition:opacity .28s,transform .32s;background:linear-gradient(145deg,rgba(10,26,46,.98),rgba(3,9,18,.985) 68%);border:1px solid #4386b174;box-shadow:0 35px 100px #000b,0 0 45px #087ee529;overflow:hidden;border-radius:calc(23*var(--u));font-size:calc(14*var(--u))}
 .panel:before{content:'';position:absolute;height:4px;left:24px;right:24px;top:0;background:linear-gradient(90deg,transparent,var(--accent),var(--gold),transparent);opacity:.8}
 .panel.open{opacity:1;pointer-events:auto;transform:none}
@@ -83,7 +101,7 @@ body{display:grid;place-items:center}
 .hero-card{border:1px solid #34a9ea82;background:linear-gradient(115deg,#064679aa,#07182d);border-radius:17px;padding:20px;margin:6px 0 17px}
 .hero-card h2{font-size:calc(25*var(--u));margin:6px 0}.hero-card p{color:#acc7dd;font-size:calc(14*var(--u));line-height:1.6;margin:0}
 .news-row{display:flex;gap:12px;cursor:pointer;padding:13px;border:1px solid #ffffff19;background:#ffffff08;border-radius:14px;margin-bottom:10px}.news-row:hover{border-color:#35b0f8}
-.news-visual{width:calc(90*var(--u));min-width:calc(90*var(--u));height:calc(66*var(--u));border-radius:9px;background:url(menu_bg.webp) center 30%/cover}
+.news-visual{width:calc(90*var(--u));min-width:calc(90*var(--u));height:calc(66*var(--u));border-radius:9px;background:url(menu_bg.jpg) center 30%/cover}
 .news-row strong{font-size:calc(14*var(--u));display:block;margin:4px 0 6px}.news-row small{color:#7ba4c3;font-size:calc(11*var(--u))}.news-row p{font-size:calc(12*var(--u));color:#92a9bc;margin:0;line-height:1.4}
 .connection-view{text-align:center;padding-top:20px}
 .spinner{width:calc(74*var(--u));height:calc(74*var(--u));margin:8px auto 17px;border-radius:50%;border:4px solid #ffffff1c;border-top-color:#2ea8ff;animation:spin 1s linear infinite}
@@ -98,17 +116,19 @@ body{display:grid;place-items:center}
 <body>
 <div class="backdrop"></div>
 <main id="app" class="app">
-  <img class="art" src="menu_bg.webp" alt="" draggable="false">
-  <button class="hotspot hot-connect" data-action="connect" title="Підключення"></button>
+  <img class="art" src="menu_bg.jpg" alt="" draggable="false">
+  <button class="mbtn primary m-connect" data-action="connect"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><div class="t"><strong>ПІДКЛЮЧЕННЯ</strong><span>Список серверів</span></div><i>›</i></button>
   <button class="ingame-btn" data-action="resume"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><div><strong>ПРОДОВЖИТИ ГРУ</strong><span>Повернутися на сервер</span></div></button>
-  <button class="hotspot hot-servers" data-view="servers" title="Список серверів"></button>
-  <button class="hotspot hot-settings" data-action="settings" title="Налаштування"></button>
-  <button class="hotspot hot-exit" data-view="exit" title="Вихід"></button>
-  <button class="hotspot hot-servercard" data-view="project" title="Львівський 01"></button>
-  <button class="hotspot hot-news" data-view="news" title="Усі новини"></button>
-  <button class="hotspot hot-news1" data-news="0"></button>
-  <button class="hotspot hot-news2" data-news="1"></button>
-  <button class="hotspot hot-news3" data-news="2"></button>
+  <button class="mbtn m-servers" data-view="servers"><svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm0 6.5h16a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1ZM4 17h16a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1a1 1 0 0 1 1-1Zm2-11.2a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm0 6.5a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg><div class="t"><strong>СПИСОК СЕРВЕРІВ</strong><span>Усі доступні сервери</span></div><i>›</i></button>
+  <button class="mbtn m-settings" data-action="settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5ZM13 15.5A3.5 3.5 0 1 1 13 8.5a3.5 3.5 0 0 1 0 7Z" transform="translate(-1 0)"/></svg><div class="t"><strong>НАЛАШТУВАННЯ</strong><span>Гра, графіка, керування</span></div><i>›</i></button>
+  <button class="mbtn m-exit" data-view="exit"><svg viewBox="0 0 24 24"><path d="M11 2h2v10h-2zm6.1 3.3 1.4-1.4A9.9 9.9 0 1 1 5.5 3.9l1.4 1.4a8 8 0 1 0 10.2 0Z"/></svg><div class="t"><strong>ВИХІД</strong><span>Закрити клієнт</span></div><i>›</i></button>
+  <button class="card01" data-view="project"><strong>ЛЬВІВСЬКИЙ 01</strong><span>В РОЗРОБЦІ ⚙</span></button>
+  <section class="newsbox">
+    <div class="hd"><span>НОВИНИ</span><button data-view="news">УСІ НОВИНИ →</button></div>
+    <button class="nrow" data-news="0"><img src="news1.jpg" alt=""><div><small>12 КВІТНЯ 2025</small><strong>ВІДКРИТА BETA LVIV GTA</strong><span>Нові можливості, унікальна атмосфера Львова та багато іншого.</span></div></button>
+    <button class="nrow" data-news="1"><img src="news2.jpg" alt=""><div><small>5 КВІТНЯ 2025</small><strong>ВЕСНЯНИЙ СЕЗОН</strong><span>Додано нові івенти, роботи та унікальні предмети.</span></div></button>
+    <button class="nrow" data-news="2"><img src="news3.jpg" alt=""><div><small>28 БЕРЕЗНЯ 2025</small><strong>ТЕХНІЧНІ РОБОТИ</strong><span>Покращено стабільність серверів та оптимізовано клієнт.</span></div></button>
+  </section>
   <div class="online unknown" id="online" data-view="servers">
     <svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm-8 0a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13Zm8 0c-.3 0-.6 0-1 .1a4.2 4.2 0 0 1 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5Z"/></svg>
     <div class="txt"><div class="st"><i></i><span id="onlineState">НЕМАЄ ДАНИХ</span></div><div class="num" id="onlineNum">—</div><div class="lbl" id="onlineLbl">ГРАВЦІВ</div></div>
@@ -144,6 +164,8 @@ let S = {ingame:false, connecting:false, failed:false, networkReady:false,
 let view = '', newsIndex = 0, wantConnectView = false;
 
 window.lvivNative = {
+  // Called by the client when the menu is shown again: touch the DOM so CEF repaints the (recreated) texture
+  repaint() { document.body.style.opacity = '0.999'; requestAnimationFrame(() => { document.body.style.opacity = ''; }); },
   setState(next) {
     const wasConnecting = S.connecting;
     S = next;
@@ -193,7 +215,7 @@ function renderServers() {
   body.innerHTML = `
     <div class="section-label">СЕРВЕРІВ: 1</div>
     <div class="server-row"><div class="server-icon"></div>
-      <div class="server-copy"><strong>${esc(S.server.name || 'LVIV GTA BETA')}</strong><span>${esc(endpoint())} • Український RolePlay</span></div>
+      <div class="server-copy"><strong>${esc(S.server.name || 'LVIV GTA BETA')}</strong><span>Український RolePlay</span></div>
       <span class="pill ${st.cls}">${st.text}</span></div>
     <div class="stats">
       <div class="stat"><small>Гравці</small><b>${esc(st.players)}</b></div>
@@ -209,7 +231,7 @@ function renderServers() {
 }
 
 function renderConnection() {
-  heading('МЕРЕЖА • ПІДКЛЮЧЕННЯ', 'Підключення', endpoint());
+  heading('МЕРЕЖА • ПІДКЛЮЧЕННЯ', 'Підключення', 'LVIV GTA BETA');
   let icon, title, text, buttons;
   if (S.connecting) {
     icon = '<div class="spinner"></div>'; title = 'Підключення до LVIV GTA BETA';
@@ -240,14 +262,14 @@ function renderNews() {
 function renderArticle() {
   const n = NEWS[newsIndex];
   heading(n.date, 'Новини проєкту', 'GTA LVIV BETA');
-  body.innerHTML = `<div class="hero-card" style="min-height:160px;background:linear-gradient(110deg,#0c2343aa,#04142244),url(menu_bg.webp) center 36%/cover"><div class="eyebrow">${n.date}</div><h2 style="text-shadow:0 2px 10px #000">${n.title}</h2></div>
+  body.innerHTML = `<div class="hero-card" style="min-height:160px;background:linear-gradient(110deg,#0c2343aa,#04142244),url(menu_bg.jpg) center 36%/cover"><div class="eyebrow">${n.date}</div><h2 style="text-shadow:0 2px 10px #000">${n.title}</h2></div>
     <p style="line-height:1.8;color:#c5d9e8">${n.detail}</p><div class="row-actions"><button class="btn blue" data-go="news">← ПОВЕРНУТИСЯ ДО НОВИН</button></div>`;
   bindActs();
 }
 
 function renderProject() {
   heading('ГОЛОВНИЙ ПРОЄКТ • LVIV GTA', 'Львівський 01', 'Український сервер у розробці.');
-  body.innerHTML = `<div class="hero-card" style="padding:25px;background:linear-gradient(105deg,#0a234dc9,#041526aa),url(menu_bg.webp) center 27%/cover"><span class="pill yellow">⚙ В РОЗРОБЦІ</span><h2>ЛЬВІВСЬКИЙ 01</h2><p>Атмосфера рідного міста. Власна історія. Твій новий світ у MTA:SA.</p></div>
+  body.innerHTML = `<div class="hero-card" style="padding:25px;background:linear-gradient(105deg,#0a234dc9,#041526aa),url(menu_bg.jpg) center 27%/cover"><span class="pill yellow">⚙ В РОЗРОБЦІ</span><h2>ЛЬВІВСЬКИЙ 01</h2><p>Атмосфера рідного міста. Власна історія. Твій новий світ у MTA:SA.</p></div>
     <div class="row-actions"><button class="btn blue" data-go="servers">СТАТУС СЕРВЕРА</button></div>`;
   bindActs();
 }

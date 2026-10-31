@@ -31,7 +31,7 @@ public:
     void DoPulse(bool bMenuVisible, float fAlpha, bool bIngame);
 
     // CWebBrowserEventsInterface
-    void Events_OnCreated() override {}
+    void Events_OnCreated() override;
     void Events_OnLoadingStart(const SString& strURL, bool bMainFrame) override {}
     void Events_OnDocumentReady(const SString& strURL) override;
     void Events_OnLoadingFailed(const SString& strURL, int errorCode, const SString& errorDescription) override;
@@ -59,6 +59,7 @@ private:
     CGUIWebBrowser*    m_pBrowser = nullptr;
     bool               m_bDocumentReady = false;
     bool               m_bIngame = false;
+    bool               m_bWasVisible = false;
 
     // Connection tracking for the "Повторити підключення" button
     bool    m_bWasConnecting = false;
